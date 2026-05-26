@@ -1,6 +1,7 @@
 :root {
   --bp-chat-max-width: 1080px;
-  --bp-chat-top-offset: 56px;
+  --bp-chat-top-offset: 20px;
+  --bp-chat-content-gap: 16px;
 }
 
 /* Center and widen the full chat shell */
@@ -21,22 +22,25 @@
   margin-right: auto !important;
 }
 
-/* Chainlit content shell: start centered, then drop toward bottom once chat has messages */
+/* Keep chat content in normal flow so messages stay close to the composer. */
 #root .flex.flex-col.mx-auto.w-full.p-4.pt-0 {
-  min-height: calc(100vh - 188px);
   display: flex;
   flex-direction: column;
-  justify-content: center;
+  gap: var(--bp-chat-content-gap);
+  justify-content: flex-start;
+  min-height: auto;
   padding-top: var(--bp-chat-top-offset) !important;
 }
 
 #root .flex.flex-col.mx-auto.w-full.p-4.pt-0:has(article) {
-  justify-content: flex-end;
+  justify-content: flex-start;
+  min-height: auto;
   padding-top: var(--bp-chat-top-offset) !important;
 }
 
 #message-composer {
   max-width: var(--bp-chat-max-width);
+  margin-top: var(--bp-chat-content-gap) !important;
 }
 
 /* Make the input area feel less cramped on desktop */
