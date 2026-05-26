@@ -1,0 +1,59 @@
+# Common patterns to ignore unimportant files
+
+# Python bytecode
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environments
+.venv/
+venv/
+ENV/
+env/
+venv.bak/
+
+# Environment files
+.env
+.env.*
+
+# Pytest / coverage / testing
+.pytest_cache/
+.mypy_cache/
+.cache/
+.coverage
+htmlcov/
+tox/
+
+# Distribution / packaging
+build/
+dist/
+*.egg-info/
+pip-wheel-metadata/
+
+# Editor and OS files
+.DS_Store
+.idea/
+.vscode/
+Thumbs.db
+*.swp
+*~
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Node
+node_modules/
+
+# Logs
+*.log
+
+# Compiled Python
+*.pyc
+*.pyo
+*.pyd
+
+# Misc
+.envrc
+*.egg
+Legacyapp.py
+

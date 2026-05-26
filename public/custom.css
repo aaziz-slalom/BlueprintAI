@@ -1,0 +1,48 @@
+:root {
+  --bp-chat-max-width: 1080px;
+  --bp-chat-top-offset: 56px;
+}
+
+/* Center and widen the full chat shell */
+#root main > div,
+#root main .MuiContainer-root {
+  max-width: var(--bp-chat-max-width) !important;
+  margin-left: auto !important;
+  margin-right: auto !important;
+}
+
+/* Keep message bubbles and composer aligned to the same centered width */
+#root [class*='MessageList'],
+#root [class*='messageList'],
+#root [class*='Composer'],
+#root [class*='composer'] {
+  max-width: var(--bp-chat-max-width) !important;
+  margin-left: auto !important;
+  margin-right: auto !important;
+}
+
+/* Chainlit content shell: start centered, then drop toward bottom once chat has messages */
+#root .flex.flex-col.mx-auto.w-full.p-4.pt-0 {
+  min-height: calc(100vh - 188px);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding-top: var(--bp-chat-top-offset) !important;
+}
+
+#root .flex.flex-col.mx-auto.w-full.p-4.pt-0:has(article) {
+  justify-content: flex-end;
+  padding-top: var(--bp-chat-top-offset) !important;
+}
+
+#message-composer {
+  max-width: var(--bp-chat-max-width);
+}
+
+/* Make the input area feel less cramped on desktop */
+@media (min-width: 1024px) {
+  #root textarea,
+  #root input[type='text'] {
+    min-height: 52px;
+  }
+}
