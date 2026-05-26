@@ -144,18 +144,16 @@ async def on_message(message: cl.Message):
         await cl.Message(content="Genie is not initialized yet. Add token in sidebar or `.env`, then retry.").send()
         return
 
-    response_msg = cl.Message(content="")
-    await response_msg.send()
-
-    async def stream_token(token: str):
-        await response_msg.stream_token(token)
+    thinking_msg = cl.Message(content="*Thinking…*")
+    await thinking_msg.send()
 
     try:
-        await agent.send_message(message.content, on_token=stream_token)
+        full_response = await agent.send_message(message.content)
+        thinking_msg.content = full_response
     except Exception as e:
-        await response_msg.stream_token(f"\n\n⚠️ Error: {e}")
+        thinking_msg.content = f"⚠️ Error: {e}"
 
-    await response_msg.update()
+    await thinking_msg.update()
 
 
 @cl.on_chat_end

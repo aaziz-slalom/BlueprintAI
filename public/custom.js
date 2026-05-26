@@ -9,6 +9,21 @@
       document.head.appendChild(link);
     }
     link.setAttribute('href', href);
+    // 1. Select the avatar container by escaping the special characters in the Tailwind classes
+    const avatar = document.querySelector(
+      '.relative.flex.shrink-0.overflow-hidden.rounded-full.h-5.w-5.mt-\\[3px\\]',
+    );
+
+    if (avatar) {
+      // 2. Remove the old size and alignment classes
+      avatar.classList.remove('h-5', 'w-5', 'mt-[3px]');
+
+      // 3. Add your new larger size classes (h-10 and w-10 are 40px)
+      // We also remove or adjust the top margin so it aligns nicely with the text
+      avatar.classList.add('h-10', 'w-10', 'mt-0');
+
+      console.log('Avatar resized successfully!');
+    }
   }
 
   function replaceBrandLogos() {

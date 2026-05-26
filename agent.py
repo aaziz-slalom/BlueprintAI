@@ -6,9 +6,14 @@ Exposes a simple send_message() that streams tokens to a callback.
 """
 
 import asyncio
-from typing import Any, Awaitable, Callable, Optional
 
+from copilot import CopilotClient
 from copilot.client import SubprocessConfig
+from copilot.generated.session_events import (
+    AssistantMessageData,
+    SessionIdleData,
+)
+from copilot.session import PermissionHandler
 import config
 from tools.filesystem_search import make_tool
 
@@ -27,16 +32,12 @@ Your behavior:
 - Use the Lucid MCP tools to create diagrams directly in Lucidchart.
 - After creating a diagram, return the Lucidchart document link to the user.
 - When the user requests changes to an existing diagram, update the same document rather than creating a new one.
-- If Lucidchart tools fail or are unavailable, render the diagram as Mermaid syntax in the chat as a fallback.
+- If Lucidchart tools fail or are unavailable, render the diagram as markdown in the chat as a fallback.
 - If you cannot find relevant files in the codebase, inform the user and ask for clarification.
 
 Your tone:
 - Concise, professional, and action-oriented.
 - No unnecessary preamble. Get to the output fast."""
-
-
-def _approve_all(request, invocation):
-    return {"kind": "approved"}
 
 
 class BlueprintAgent:
@@ -47,8 +48,6 @@ class BlueprintAgent:
         self._session = None
 
     async def start(self):
-        from copilot import CopilotClient
-
         if not self.github_token:
             raise ValueError("Missing GitHub token. Set GITHUB_TOKEN in .env or provide it in the app sidebar.")
 
@@ -59,13 +58,12 @@ class BlueprintAgent:
 
         self._session = await self._client.create_session(
             model=self.model,
-            streaming=True,
             system_message={
                 "mode": "replace",
                 "content": SYSTEM_PROMPT,
             },
             tools=[fs_tool],
-            on_permission_request=_approve_all,
+            on_permission_request=PermissionHandler.approve_all,
             mcp_servers={
                 "lucid": {
                     "type": "local",
@@ -76,12 +74,8 @@ class BlueprintAgent:
             },
         )
 
-    async def send_message(
-        self,
-        message: str,
-        on_token: Optional[Callable[[str], Awaitable[None]]] = None,
-    ) -> str:
-        """Send a message and stream tokens via on_token callback. Returns full response."""
+    async def send_message(self, message: str) -> str:
+        """Send a message and return the full response string."""
         if not self._session:
             raise RuntimeError("Agent not started. Call start() first.")
 
@@ -93,35 +87,24 @@ class BlueprintAgent:
         unsubscribe = self._session.on(_event_handler)
         await self._session.send(message)
 
-        full_response: list[str] = []
+        full_response = ""
         try:
             while True:
                 event = await asyncio.wait_for(queue.get(), timeout=180.0)
-                event_type = _event_type(event)
+                data = event.data
 
-                if event_type == "session.idle":
+                if isinstance(data, SessionIdleData):
                     break
 
-                if event_type == "assistant.message_delta":
-                    delta = _extract_text(event)
-                    if delta:
-                        full_response.append(delta)
-                        if on_token:
-                            await on_token(delta)
+                elif isinstance(data, AssistantMessageData):
+                    full_response = data.content or ""
 
-                elif event_type == "assistant.message":
-                    # Non-streaming fallback: full content in one event
-                    content = _extract_text(event)
-                    if content and not full_response:
-                        full_response.append(content)
-                        if on_token:
-                            await on_token(content)
         except asyncio.TimeoutError:
-            full_response.append("\n\n[Response timed out]")
+            full_response += "\n\n[Response timed out]"
         finally:
             unsubscribe()
 
-        return "".join(full_response)
+        return full_response
 
     async def stop(self):
         if self._session:
@@ -136,27 +119,4 @@ class BlueprintAgent:
                 pass
 
 
-def _event_type(event: Any) -> str:
-    if isinstance(event, dict):
-        return str(event.get("type", ""))
-    return str(getattr(event, "type", ""))
 
-
-def _event_data(event: Any) -> Any:
-    if isinstance(event, dict):
-        return event.get("data", {})
-    return getattr(event, "data", {})
-
-
-def _extract_text(event: Any) -> str:
-    data = _event_data(event)
-
-    if isinstance(data, dict):
-        return str(data.get("delta_content") or data.get("deltaContent") or data.get("content") or "")
-
-    return str(
-        getattr(data, "delta_content", None)
-        or getattr(data, "deltaContent", None)
-        or getattr(data, "content", None)
-        or ""
-    )

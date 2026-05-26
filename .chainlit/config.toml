@@ -95,7 +95,7 @@ reaction_on_message_received = false
 
 [UI]
 # Name of the assistant.
-name = "BlueprintAI"
+name = "Genie"
 
 # default_theme = "dark"
 
@@ -156,10 +156,10 @@ alert_style = "classic"
 logo_file_url = "/public/genie-logo.svg"
 
 # Load assistant avatar image directly from URL.
-default_avatar_file_url = "/public/genie-logo.svg"
+default_avatar_file_url = "/public/avatar/avatar.svg"
 
 # Avatar size in pixels (default: 20).
-# avatar_size = 20
+# avatar_size = 60
 
 # Specify a custom build directory for the frontend.
 # This can be used to customize the frontend code.
