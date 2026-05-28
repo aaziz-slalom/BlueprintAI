@@ -1,5 +1,5 @@
 (function () {
-  const GENIE_LOGO = '/public/genie-logo.svg';
+  const GENIE_LOGO = '/public/pic.png';
 
   function setOrCreateIcon(rel, href) {
     let link = document.querySelector("link[rel='" + rel + "']");

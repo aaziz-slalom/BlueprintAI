@@ -11,7 +11,9 @@
   margin-left: auto !important;
   margin-right: auto !important;
 }
-
+#root .w-\[200px\] {
+  width: 450px !important;
+}
 /* Keep message bubbles and composer aligned to the same centered width */
 #root [class*='MessageList'],
 #root [class*='messageList'],
